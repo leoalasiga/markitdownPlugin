@@ -4,6 +4,18 @@
 
 Desktop utility for converting `.doc` and `.docx` files into Markdown.
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Platform: Windows](https://img.shields.io/badge/Platform-Windows-blue.svg)](#fast-start-on-windows)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](#requirements)
+
+## Overview
+
+This project provides a simple desktop app for converting Word files into Markdown.
+
+- `.docx` files are converted directly with MarkItDown
+- `.doc` files are converted to temporary `.docx` files with LibreOffice first
+- output goes to the source folder by default, or to a custom folder if you prefer
+
 ## Features
 
 - Single-window desktop app built with Tkinter
@@ -13,6 +25,18 @@ Desktop utility for converting `.doc` and `.docx` files into Markdown.
 - Saves Markdown beside the source file by default
 - Optional custom output folder
 - Batch-safe error handling with per-file status and run summary
+
+## Project Files
+
+```text
+app.py                  Application entry point
+src/gui.py              Tkinter user interface
+src/converter.py        Conversion workflow
+src/libreoffice.py      LibreOffice bridge for .doc files
+src/markitdown_adapter.py  MarkItDown wrapper
+run_windows.bat         One-click Windows launcher
+build_windows.bat       One-click Windows build script
+```
 
 ## Requirements
 
@@ -86,3 +110,21 @@ If you want a standalone `.exe`:
 1. Double-click `build_windows.bat`.
 2. Wait for the build to finish.
 3. Open `dist/MarkItDownTool.exe`.
+
+## Roadmap
+
+- Drag and drop support
+- Better visual polish for the desktop UI
+- Application icon and release packaging improvements
+- More automated tests around conversion failures
+
+## Contributing
+
+Pull requests and issues are welcome.
+
+- Contribution guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Release notes: [CHANGELOG.md](CHANGELOG.md)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

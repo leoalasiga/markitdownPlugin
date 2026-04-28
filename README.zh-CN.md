@@ -4,6 +4,18 @@
 
 一个用于将 `.doc` 和 `.docx` 文档转换为 Markdown 的 Windows 桌面小工具。
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Platform: Windows](https://img.shields.io/badge/Platform-Windows-blue.svg)](#windows-快速开始)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB.svg)](#运行要求)
+
+## 项目简介
+
+这个项目提供了一个简单直接的桌面工具，用来把 Word 文档转换成 Markdown。
+
+- `.docx` 直接通过 MarkItDown 转换
+- `.doc` 先通过 LibreOffice 转成临时 `.docx` 再继续转换
+- 默认输出到源文件目录，也支持统一输出到自定义目录
+
 ## 功能特点
 
 - 基于 Tkinter 的单窗口桌面应用
@@ -13,6 +25,18 @@
 - 默认输出到源文件同目录
 - 支持自定义输出目录
 - 支持逐文件状态显示和整批任务结果汇总
+
+## 项目文件
+
+```text
+app.py                  应用入口
+src/gui.py              Tkinter 图形界面
+src/converter.py        转换流程编排
+src/libreoffice.py      .doc 转换桥接层
+src/markitdown_adapter.py  MarkItDown 封装
+run_windows.bat         Windows 一键运行脚本
+build_windows.bat       Windows 一键打包脚本
+```
 
 ## 运行要求
 
@@ -86,3 +110,21 @@ pyinstaller markitdown_tool.spec
 1. 双击 `build_windows.bat`。
 2. 等待打包完成。
 3. 打开 `dist/MarkItDownTool.exe`。
+
+## 路线图
+
+- 支持拖拽文件
+- 改进桌面界面视觉效果
+- 增加应用图标和更完整的发布打包
+- 增加更多异常路径的自动化测试
+
+## 参与贡献
+
+欢迎提交 Issue 和 Pull Request。
+
+- 贡献说明：[CONTRIBUTING.md](CONTRIBUTING.md)
+- 发布记录：[CHANGELOG.md](CHANGELOG.md)
+
+## 开源协议
+
+本项目采用 [MIT License](LICENSE) 开源。
