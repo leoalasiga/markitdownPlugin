@@ -1,11 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+from PyInstaller.utils.hooks import collect_data_files
+
+
+magika_datas = collect_data_files("magika")
+
 
 a = Analysis(
     ["app.py"],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=magika_datas,
     hiddenimports=["markitdown"],
     hookspath=[],
     hooksconfig={},
