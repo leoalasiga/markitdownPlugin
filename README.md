@@ -1,5 +1,7 @@
 # MarkItDown Windows Tool
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 Desktop utility for converting `.doc` and `.docx` files into Markdown.
 
 ## Features
