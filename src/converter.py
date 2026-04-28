@@ -2,6 +2,7 @@ import tempfile
 from pathlib import Path
 
 from src.libreoffice import convert_doc_to_docx
+from src.markdown_images import extract_inline_images_for_markdown
 from src.markitdown_adapter import convert_docx_to_markdown
 from src.models import ConversionResult
 from src.utils import build_output_path, is_doc_file, is_supported_file
@@ -10,6 +11,7 @@ from src.utils import build_output_path, is_doc_file, is_supported_file
 def write_markdown(output_path: str | Path, markdown: str) -> None:
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    markdown = extract_inline_images_for_markdown(markdown, path)
     path.write_text(markdown, encoding="utf-8")
 
 
