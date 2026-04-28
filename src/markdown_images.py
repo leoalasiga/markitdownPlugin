@@ -3,6 +3,8 @@ from __future__ import annotations
 import base64
 import binascii
 import hashlib
+import html
+from html.parser import HTMLParser
 import re
 import sys
 from collections import Counter
@@ -10,9 +12,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 
-IMG_RE = re.compile(
-    r"!\[([^\]]*)\]\(data:image/([a-zA-Z0-9+\-.]+);base64,([A-Za-z0-9+/=\s]+?)\)",
+IMAGE_PLACEHOLDER_PREFIX = r"[\ufffc\ufffd]*"
+
+MD_IMG_RE = re.compile(
+    IMAGE_PLACEHOLDER_PREFIX
+    + r"!\[([^\]]*)\]\(\s*<?data:image/([a-zA-Z0-9+\-.]+);base64,"
+    r"([A-Za-z0-9+/=\s]+?)>?(?:\s+(?:\"[^\"]*\"|'[^']*'|\([^)]+\)))?\s*\)",
     re.DOTALL,
+)
+HTML_IMG_RE = re.compile(
+    IMAGE_PLACEHOLDER_PREFIX + r"<img\b(?P<attrs>[^>]*)>",
+    re.IGNORECASE | re.DOTALL,
 )
 
 MIME_EXT = {
@@ -42,6 +52,16 @@ class Stats:
         self.duplicated += other.duplicated
         self.failed += other.failed
         self.by_mime.update(other.by_mime)
+
+
+class _ImgAttrParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.attrs: dict[str, str] = {}
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.lower() == "img":
+            self.attrs = {key.lower(): value or "" for key, value in attrs}
 
 
 def read_markdown(path: Path) -> str:
@@ -107,18 +127,16 @@ def process_markdown(
     hash_to_name: dict[str, str] = {}
     saved = 0
 
-    def replace(match: re.Match) -> str:
+    def save_image(alt: str, mime_subtype: str, b64_raw: str, original: str) -> str:
         nonlocal saved
         stats.matched += 1
         idx = stats.matched
-        alt = match.group(1)
-        mime_subtype = match.group(2)
-        data = _decode(match.group(3))
+        data = _decode(b64_raw)
 
         if data is None:
             stats.failed += 1
             print(f"[warn] img #{idx}: base64 decode failed, keeping data URI", file=sys.stderr)
-            return match.group(0)
+            return original
 
         digest = hashlib.sha256(data).hexdigest()
         stats.by_mime[mime_subtype.lower()] += 1
@@ -144,7 +162,35 @@ def process_markdown(
 
         return f"![{alt}]({image_subdir_name}/{filename})"
 
-    return IMG_RE.sub(replace, content), stats
+    def replace_markdown_image(match: re.Match) -> str:
+        return save_image(
+            alt=match.group(1),
+            mime_subtype=match.group(2),
+            b64_raw=match.group(3),
+            original=match.group(0),
+        )
+
+    def replace_html_image(match: re.Match) -> str:
+        parser = _ImgAttrParser()
+        parser.feed(match.group(0))
+        src = parser.attrs.get("src", "")
+        src_match = re.fullmatch(
+            r"\s*data:image/([a-zA-Z0-9+\-.]+);base64,([A-Za-z0-9+/=\s]+)\s*",
+            src,
+            re.DOTALL,
+        )
+        if src_match is None:
+            return match.group(0)
+        return save_image(
+            alt=html.escape(parser.attrs.get("alt", ""), quote=False),
+            mime_subtype=src_match.group(1),
+            b64_raw=src_match.group(2),
+            original=match.group(0),
+        )
+
+    content = MD_IMG_RE.sub(replace_markdown_image, content)
+    content = HTML_IMG_RE.sub(replace_html_image, content)
+    return content, stats
 
 
 def extract_inline_images_for_markdown(
