@@ -7,8 +7,8 @@ from tkinter import END, BOTH, DISABLED, NORMAL, StringVar, Text, Tk, filedialog
 from tkinter import ttk
 
 from src.converter import convert_one
-from src.libreoffice import LibreOfficeNotFoundError, find_soffice
-from src.utils import is_doc_file, is_supported_file
+from src.libreoffice import find_soffice
+from src.utils import get_output_folder_for_open, is_doc_file, is_supported_file
 
 
 class ConverterApp:
@@ -32,6 +32,11 @@ class ConverterApp:
     def _build_ui(self) -> None:
         container = ttk.Frame(self.root, padding=12)
         container.pack(fill=BOTH, expand=True)
+
+        hint_text = (
+            "Tip: .docx converts directly. .doc needs LibreOffice installed and available as soffice."
+        )
+        ttk.Label(container, text=hint_text, foreground="#4b5563").pack(fill="x", pady=(0, 10))
 
         self._build_file_section(container)
         self._build_output_section(container)
@@ -144,9 +149,14 @@ class ConverterApp:
             self.custom_output_dir.set(selected_dir)
 
     def open_output_folder(self) -> None:
-        output_dir = self._get_output_dir_for_open()
+        source_paths = [Path(self.tree.set(item_id, "path")) for item_id in self.tree.get_children()]
+        output_dir = get_output_folder_for_open(source_paths, self.output_mode.get(), self.custom_output_dir.get().strip())
         if not output_dir:
-            messagebox.showinfo("Output folder", "Choose a custom output folder first.")
+            messagebox.showinfo(
+                "Output folder",
+                "In source-folder mode, open output folder works after you add exactly one file. "
+                "For multiple files, use a custom output folder.",
+            )
             return
 
         target = Path(output_dir)
@@ -305,12 +315,10 @@ class ConverterApp:
 
     def _refresh_summary(self) -> None:
         count = len(self.tree.get_children())
+        if count == 0:
+            self.summary_text.set("Ready.")
+            return
         self.summary_text.set(f"{count} file(s) selected.")
-
-    def _get_output_dir_for_open(self) -> str | None:
-        if self.output_mode.get() == "custom":
-            return self.custom_output_dir.get().strip() or None
-        return None
 
 
 def main() -> None:

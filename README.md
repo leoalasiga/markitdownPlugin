@@ -33,6 +33,10 @@ py -m pip install -r requirements.txt
 py app.py
 ```
 
+Or on Windows, just double-click:
+
+- `run_windows.bat`
+
 ## Run Tests
 
 The current automated tests use the Python standard library `unittest` runner:
@@ -54,6 +58,10 @@ PYTHONPATH=. python3 -m unittest discover -s tests -v
 pyinstaller markitdown_tool.spec
 ```
 
+Or on Windows, just double-click:
+
+- `build_windows.bat`
+
 Expected output:
 
 - `dist/MarkItDownTool.exe`
@@ -63,3 +71,16 @@ Expected output:
 - `.docx` works through MarkItDown directly.
 - `.doc` requires LibreOffice because this app first converts `.doc` to a temporary `.docx`.
 - If LibreOffice is missing, the app will stop before the run starts and show a clear message.
+
+## Fast Start On Windows
+
+1. Install Python 3.11+.
+2. If you need `.doc` support, install LibreOffice.
+3. Open this project folder.
+4. Double-click `run_windows.bat`.
+
+If you want a standalone `.exe`:
+
+1. Double-click `build_windows.bat`.
+2. Wait for the build to finish.
+3. Open `dist/MarkItDownTool.exe`.
