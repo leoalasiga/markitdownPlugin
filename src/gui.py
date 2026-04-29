@@ -1,4 +1,5 @@
 import os
+import inspect
 import queue
 import subprocess
 import sys
@@ -22,8 +23,31 @@ class FileItem:
 
 def _create_file_picker(ft_module: Any, on_result: Any) -> Any:
     picker = ft_module.FilePicker()
-    picker.on_result = on_result
+    if hasattr(picker, "on_result"):
+        picker.on_result = on_result
     return picker
+
+
+def _alignment_center(ft_module: Any) -> Any:
+    alignment = getattr(ft_module, "Alignment", None)
+    if alignment is not None and hasattr(alignment, "CENTER"):
+        return alignment.CENTER
+
+    alignment_module = getattr(ft_module, "alignment", None)
+    if alignment_module is not None and hasattr(alignment_module, "center"):
+        return alignment_module.center
+
+    return None
+
+
+def _set_window_value(page: Any, legacy_name: str, window_name: str, value: int) -> None:
+    window = getattr(page, "window", None)
+    if window is not None and (hasattr(window, window_name) or not hasattr(page, legacy_name)):
+        setattr(window, window_name, value)
+        return
+
+    if hasattr(page, legacy_name):
+        setattr(page, legacy_name, value)
 
 
 def _create_button(
@@ -61,6 +85,7 @@ class ConverterApp:
         self.page = page
         self.ft = ft_module
         self.icons = getattr(self.ft, "Icons", getattr(self.ft, "icons", None))
+        self.center_alignment = _alignment_center(self.ft)
 
         self.files: list[FileItem] = []
         self.output_mode = "source"
@@ -71,7 +96,8 @@ class ConverterApp:
 
         self.file_picker = _create_file_picker(self.ft, self._on_files_selected)
         self.folder_picker = _create_file_picker(self.ft, self._on_folder_selected)
-        self.page.overlay.extend([self.file_picker, self.folder_picker])
+        if hasattr(self.file_picker, "on_result") or hasattr(self.folder_picker, "on_result"):
+            self.page.overlay.extend([self.file_picker, self.folder_picker])
 
         self.status_text = self.ft.Text("Ready", size=13, color="#64748b")
         self.summary_text = self.ft.Text("Add .doc or .docx files to begin.", size=14, color="#475569")
@@ -130,10 +156,10 @@ class ConverterApp:
 
     def _configure_page(self) -> None:
         self.page.title = "MarkItDown Converter"
-        self.page.window_width = 1120
-        self.page.window_height = 760
-        self.page.window_min_width = 940
-        self.page.window_min_height = 640
+        _set_window_value(self.page, "window_width", "width", 1120)
+        _set_window_value(self.page, "window_height", "height", 760)
+        _set_window_value(self.page, "window_min_width", "min_width", 940)
+        _set_window_value(self.page, "window_min_height", "min_height", 640)
         self.page.padding = 0
         self.page.bgcolor = "#eef3f7"
         self.page.theme_mode = "light"
@@ -182,7 +208,7 @@ class ConverterApp:
                                 height=38,
                                 border_radius=8,
                                 bgcolor="#14b8a6",
-                                alignment=self.ft.alignment.center,
+                                alignment=self.center_alignment,
                                 content=self.ft.Icon(self._icon("DESCRIPTION"), color="#ffffff", size=22),
                             ),
                             self.ft.Column(
@@ -404,20 +430,25 @@ class ConverterApp:
             ),
         )
 
-    def add_files(self, _event: Any = None) -> None:
+    async def add_files(self, _event: Any = None) -> None:
         if self.running:
             return
-        self.file_picker.pick_files(
+        result = self.file_picker.pick_files(
             allow_multiple=True,
             allowed_extensions=["doc", "docx"],
             dialog_title="Select Word files",
         )
+        if inspect.isawaitable(result):
+            self._add_selected_files(await result)
 
     def _on_files_selected(self, event: Any) -> None:
-        if not event.files:
+        self._add_selected_files(getattr(event, "files", None))
+
+    def _add_selected_files(self, selected_files: Any) -> None:
+        if not selected_files:
             return
         existing = {str(item.path) for item in self.files}
-        for selected in event.files:
+        for selected in selected_files:
             if not selected.path:
                 continue
             path = Path(selected.path)
@@ -432,16 +463,23 @@ class ConverterApp:
             existing.add(resolved)
         self._refresh_all()
 
-    def choose_output_directory(self, _event: Any = None) -> None:
+    async def choose_output_directory(self, _event: Any = None) -> None:
         if self.running:
             return
-        self.folder_picker.get_directory_path(dialog_title="Choose output folder")
+        result = self.folder_picker.get_directory_path(dialog_title="Choose output folder")
+        if inspect.isawaitable(result):
+            selected_path = await result
+            if selected_path:
+                self._set_custom_output_dir(selected_path)
 
     def _on_folder_selected(self, event: Any) -> None:
         if event.path:
-            self.custom_output_dir = event.path
-            self.custom_output_field.value = event.path
-            self._refresh_all()
+            self._set_custom_output_dir(event.path)
+
+    def _set_custom_output_dir(self, path: str) -> None:
+        self.custom_output_dir = path
+        self.custom_output_field.value = path
+        self._refresh_all()
 
     def _on_output_mode_change(self, event: Any) -> None:
         self.output_mode = event.control.value
@@ -588,7 +626,7 @@ class ConverterApp:
                     height=72,
                     border_radius=8,
                     bgcolor="#f8fafc",
-                    alignment=self.ft.alignment.center,
+                    alignment=self.center_alignment,
                     content=self.ft.Text("No files selected yet.", size=13, color="#64748b"),
                 )
             ]
@@ -640,7 +678,7 @@ class ConverterApp:
             height=28,
             border_radius=8,
             bgcolor=bgcolor,
-            alignment=self.ft.alignment.center,
+            alignment=self.center_alignment,
             content=self.ft.Text(status, size=12, color=color, weight="w700"),
         )
 
@@ -708,13 +746,23 @@ class ConverterApp:
                 )
             ],
         )
-        self.page.dialog = dialog
-        dialog.open = True
-        self.page.update()
+        if hasattr(self.page, "show_dialog"):
+            self.page.show_dialog(dialog)
+        elif hasattr(self.page, "open"):
+            self.page.open(dialog)
+        else:
+            self.page.dialog = dialog
+            dialog.open = True
+            self.page.update()
 
     def _close_dialog(self, dialog: Any) -> None:
-        dialog.open = False
-        self.page.update()
+        if hasattr(self.page, "pop_dialog"):
+            self.page.pop_dialog()
+        elif hasattr(self.page, "close"):
+            self.page.close(dialog)
+        else:
+            dialog.open = False
+            self.page.update()
 
     def _file_icon(self, path: Path) -> Any:
         return self._icon("ARTICLE") if path.suffix.lower() == ".docx" else self._icon("DESCRIPTION")
