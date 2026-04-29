@@ -26,6 +26,36 @@ def _create_file_picker(ft_module: Any, on_result: Any) -> Any:
     return picker
 
 
+def _create_button(
+    ft_module: Any,
+    control_name: str,
+    label: str,
+    *,
+    icon: Any = None,
+    on_click: Any = None,
+    disabled: bool | None = None,
+    style: Any = None,
+) -> Any:
+    control = getattr(ft_module, control_name)
+    kwargs = {"content": label}
+    if icon is not None:
+        kwargs["icon"] = icon
+    if on_click is not None:
+        kwargs["on_click"] = on_click
+    if disabled is not None:
+        kwargs["disabled"] = disabled
+    if style is not None:
+        kwargs["style"] = style
+
+    try:
+        return control(**kwargs)
+    except TypeError as exc:
+        if "content" not in str(exc):
+            raise
+        kwargs["text"] = kwargs.pop("content")
+        return control(**kwargs)
+
+
 class ConverterApp:
     def __init__(self, page: Any, ft_module: Any) -> None:
         self.page = page
@@ -58,8 +88,10 @@ class ConverterApp:
             bgcolor="#ffffff",
         )
 
-        self.start_button = self.ft.FilledButton(
-            text="Start Conversion",
+        self.start_button = _create_button(
+            self.ft,
+            "FilledButton",
+            "Start Conversion",
             icon=self._icon("PLAY_ARROW"),
             on_click=self.start_conversion,
             style=self.ft.ButtonStyle(
@@ -68,19 +100,25 @@ class ConverterApp:
                 shape=self.ft.RoundedRectangleBorder(radius=8),
             ),
         )
-        self.choose_folder_button = self.ft.OutlinedButton(
-            text="Choose Folder",
+        self.choose_folder_button = _create_button(
+            self.ft,
+            "OutlinedButton",
+            "Choose Folder",
             icon=self._icon("FOLDER_OPEN"),
             on_click=self.choose_output_directory,
             disabled=True,
         )
-        self.clear_button = self.ft.OutlinedButton(
-            text="Clear",
+        self.clear_button = _create_button(
+            self.ft,
+            "OutlinedButton",
+            "Clear",
             icon=self._icon("DELETE_OUTLINE"),
             on_click=self.clear_files,
         )
-        self.open_output_button = self.ft.OutlinedButton(
-            text="Open Output",
+        self.open_output_button = _create_button(
+            self.ft,
+            "OutlinedButton",
+            "Open Output",
             icon=self._icon("OPEN_IN_NEW"),
             on_click=self.open_output_folder,
         )
@@ -269,8 +307,10 @@ class ConverterApp:
                                 spacing=2,
                                 expand=True,
                             ),
-                            self.ft.FilledButton(
-                                text="Add Files",
+                            _create_button(
+                                self.ft,
+                                "FilledButton",
+                                "Add Files",
                                 icon=self._icon("UPLOAD_FILE"),
                                 on_click=self.add_files,
                                 style=self.ft.ButtonStyle(
@@ -660,7 +700,9 @@ class ConverterApp:
             title=self.ft.Text(title),
             content=self.ft.Text(message),
             actions=[
-                self.ft.TextButton(
+                _create_button(
+                    self.ft,
+                    "TextButton",
                     "OK",
                     on_click=lambda _event: self._close_dialog(dialog),
                 )
