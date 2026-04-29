@@ -11,6 +11,7 @@ class PyInstallerSpecTests(unittest.TestCase):
         self.assertIn("find_spec", spec)
         self.assertIn("standard_v3_3", spec)
         self.assertIn("model.onnx", spec)
+        self.assertIn('"flet"', spec)
 
 
 if __name__ == "__main__":
