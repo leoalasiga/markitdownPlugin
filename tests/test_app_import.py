@@ -13,6 +13,20 @@ class AppImportTests(unittest.TestCase):
         self.assertTrue(callable(gui.main))
         self.assertTrue(hasattr(gui, "ConverterApp"))
 
+    def test_file_picker_binds_result_handler_without_constructor_keyword(self) -> None:
+        gui = importlib.import_module("src.gui")
+
+        class FilePicker:
+            def __init__(self) -> None:
+                self.on_result = None
+
+        FakeFlet = type("FakeFlet", (), {"FilePicker": FilePicker})
+
+        handler = object()
+        picker = gui._create_file_picker(FakeFlet, handler)
+
+        self.assertIs(picker.on_result, handler)
+
     def test_requirements_declares_flet(self) -> None:
         requirements = Path("requirements.txt").read_text(encoding="utf-8")
         self.assertIn("flet", requirements.lower())

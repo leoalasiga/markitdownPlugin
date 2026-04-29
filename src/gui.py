@@ -20,6 +20,12 @@ class FileItem:
     selected: bool = False
 
 
+def _create_file_picker(ft_module: Any, on_result: Any) -> Any:
+    picker = ft_module.FilePicker()
+    picker.on_result = on_result
+    return picker
+
+
 class ConverterApp:
     def __init__(self, page: Any, ft_module: Any) -> None:
         self.page = page
@@ -33,8 +39,8 @@ class ConverterApp:
         self.results_queue: queue.Queue[tuple[str, dict[str, Any]]] = queue.Queue()
         self.worker_thread: threading.Thread | None = None
 
-        self.file_picker = self.ft.FilePicker(on_result=self._on_files_selected)
-        self.folder_picker = self.ft.FilePicker(on_result=self._on_folder_selected)
+        self.file_picker = _create_file_picker(self.ft, self._on_files_selected)
+        self.folder_picker = _create_file_picker(self.ft, self._on_folder_selected)
         self.page.overlay.extend([self.file_picker, self.folder_picker])
 
         self.status_text = self.ft.Text("Ready", size=13, color="#64748b")
