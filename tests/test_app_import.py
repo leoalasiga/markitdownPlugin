@@ -8,6 +8,11 @@ class AppImportTests(unittest.TestCase):
         module = importlib.import_module("app")
         self.assertTrue(callable(module.main))
 
+    def test_gui_exposes_flet_app_entrypoint(self) -> None:
+        gui = importlib.import_module("src.gui")
+        self.assertTrue(callable(gui.main))
+        self.assertTrue(hasattr(gui, "ConverterApp"))
+
     def test_requirements_declares_flet(self) -> None:
         requirements = Path("requirements.txt").read_text(encoding="utf-8")
         self.assertIn("flet", requirements.lower())
