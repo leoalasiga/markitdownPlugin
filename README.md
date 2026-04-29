@@ -18,19 +18,20 @@ This project provides a simple desktop app for converting Word files into Markdo
 
 ## Features
 
-- Single-window desktop app built with Tkinter
+- Modern single-window desktop app built with Flet
 - Supports one or many input files
 - Converts `.docx` directly with MarkItDown
 - Converts `.doc` via headless LibreOffice, then sends the temporary `.docx` through MarkItDown
 - Saves Markdown beside the source file by default
 - Optional custom output folder
+- Card-based file list, status chips, progress, and run log
 - Batch-safe error handling with per-file status and run summary
 
 ## Project Files
 
 ```text
 app.py                  Application entry point
-src/gui.py              Tkinter user interface
+src/gui.py              Flet user interface
 src/converter.py        Conversion workflow
 src/libreoffice.py      LibreOffice bridge for .doc files
 src/markitdown_adapter.py  MarkItDown wrapper
@@ -42,6 +43,7 @@ build_windows.bat       One-click Windows build script
 
 - Python 3.11+
 - `markitdown`
+- `flet`
 - `pyinstaller` for packaging
 - LibreOffice installed and `soffice` available in `PATH` if you want `.doc` support
 
@@ -114,7 +116,7 @@ If you want a standalone `.exe`:
 ## Roadmap
 
 - Drag and drop support
-- Better visual polish for the desktop UI
+- Conversion history and Markdown preview
 - Application icon and release packaging improvements
 - More automated tests around conversion failures
 

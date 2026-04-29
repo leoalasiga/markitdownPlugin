@@ -18,19 +18,20 @@
 
 ## 功能特点
 
-- 基于 Tkinter 的单窗口桌面应用
+- 基于 Flet 的现代化单窗口桌面应用
 - 支持单个或多个文件批量转换
 - `.docx` 直接通过 MarkItDown 转换
 - `.doc` 先通过 LibreOffice 无界面转换为临时 `.docx`，再交给 MarkItDown
 - 默认输出到源文件同目录
 - 支持自定义输出目录
+- 支持卡片式文件列表、状态标签、进度条和运行日志
 - 支持逐文件状态显示和整批任务结果汇总
 
 ## 项目文件
 
 ```text
 app.py                  应用入口
-src/gui.py              Tkinter 图形界面
+src/gui.py              Flet 图形界面
 src/converter.py        转换流程编排
 src/libreoffice.py      .doc 转换桥接层
 src/markitdown_adapter.py  MarkItDown 封装
@@ -42,6 +43,7 @@ build_windows.bat       Windows 一键打包脚本
 
 - Python 3.11+
 - `markitdown`
+- `flet`
 - 如果需要打包，需要 `pyinstaller`
 - 如果需要支持 `.doc`，请安装 LibreOffice，并确保 `soffice` 已加入 `PATH`
 
@@ -114,7 +116,7 @@ pyinstaller markitdown_tool.spec
 ## 路线图
 
 - 支持拖拽文件
-- 改进桌面界面视觉效果
+- 增加转换历史和 Markdown 预览
 - 增加应用图标和更完整的发布打包
 - 增加更多异常路径的自动化测试
 
