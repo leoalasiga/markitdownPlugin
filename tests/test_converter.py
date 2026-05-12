@@ -25,6 +25,27 @@ class ConverterTests(unittest.TestCase):
         self.assertTrue(result.success)
         writer.assert_called_once()
 
+    def test_convert_one_routes_markitdown_native_format_without_libreoffice(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source = Path(temp_dir) / "slides.pdf"
+            source.write_text("placeholder", encoding="utf-8")
+            doc_bridge = Mock(side_effect=AssertionError("LibreOffice should not run"))
+            writer = Mock()
+            markdown_converter = Mock(return_value="# Slides")
+
+            result = convert_one(
+                source_path=source,
+                output_dir=None,
+                markdown_converter=markdown_converter,
+                doc_bridge=doc_bridge,
+                writer=writer,
+            )
+
+        self.assertTrue(result.success)
+        markdown_converter.assert_called_once_with(source)
+        doc_bridge.assert_not_called()
+        writer.assert_called_once()
+
     def test_convert_one_extracts_inline_images_next_to_output_markdown(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)

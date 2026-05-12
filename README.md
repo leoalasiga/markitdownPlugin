@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-Desktop utility for converting `.doc` and `.docx` files into Markdown.
+Desktop utility for converting MarkItDown-supported local files into Markdown.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows-blue.svg)](#fast-start-on-windows)
@@ -10,18 +10,21 @@ Desktop utility for converting `.doc` and `.docx` files into Markdown.
 
 ## Overview
 
-This project provides a simple desktop app for converting Word files into Markdown.
+This project provides a simple desktop app for converting documents and text-based files into Markdown.
 
 - `.docx` files are converted directly with MarkItDown
 - `.doc` files are converted to temporary `.docx` files with LibreOffice first
+- Other supported local formats are sent directly to MarkItDown
 - output goes to the source folder by default, or to a custom folder if you prefer
 
 ## Features
 
 - Modern single-window desktop app built with Flet
 - Supports one or many input files
-- Converts `.docx` directly with MarkItDown
+- Converts MarkItDown-supported local file formats directly
 - Converts `.doc` via headless LibreOffice, then sends the temporary `.docx` through MarkItDown
+- Supports document and text formats such as `.pdf`, `.docx`, `.pptx`, `.xlsx`, `.xls`, `.csv`, `.json`, `.jsonl`, `.xml`, `.html`, `.htm`, `.txt`, `.text`, `.md`, `.markdown`, `.epub`, `.ipynb`, `.msg`, and `.zip`
+- Also allows MarkItDown media inputs such as `.jpg`, `.jpeg`, `.png`, `.mp3`, `.wav`, `.m4a`, and `.mp4`
 - Saves Markdown beside the source file by default
 - Optional custom output folder
 - Card-based file list, status chips, progress, and run log
@@ -93,6 +96,14 @@ Or on Windows, just double-click:
 Expected output:
 
 - `dist/MarkItDownTool.exe`
+
+## Supported Input Files
+
+This tool follows Microsoft MarkItDown's local file converter coverage for file-based inputs. URL-only inputs such as YouTube pages are not part of the desktop file picker.
+
+- Documents: `.pdf`, `.docx`, `.doc`, `.pptx`, `.xlsx`, `.xls`, `.epub`, `.msg`
+- Text and structured text: `.txt`, `.text`, `.md`, `.markdown`, `.csv`, `.json`, `.jsonl`, `.xml`, `.html`, `.htm`, `.ipynb`
+- Archives and media: `.zip`, `.jpg`, `.jpeg`, `.png`, `.mp3`, `.wav`, `.m4a`, `.mp4`
 
 ## Notes About `.doc`
 

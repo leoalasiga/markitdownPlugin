@@ -1,7 +1,38 @@
 from pathlib import Path
 
 
-SUPPORTED_EXTENSIONS = {".doc", ".docx"}
+LIBREOFFICE_BRIDGED_EXTENSIONS = {".doc"}
+MARKITDOWN_NATIVE_EXTENSIONS = {
+    ".csv",
+    ".docx",
+    ".epub",
+    ".htm",
+    ".html",
+    ".ipynb",
+    ".jpeg",
+    ".jpg",
+    ".json",
+    ".jsonl",
+    ".m4a",
+    ".markdown",
+    ".md",
+    ".mp3",
+    ".mp4",
+    ".msg",
+    ".pdf",
+    ".png",
+    ".pptx",
+    ".text",
+    ".txt",
+    ".wav",
+    ".xls",
+    ".xlsx",
+    ".xml",
+    ".zip",
+}
+SUPPORTED_EXTENSIONS = LIBREOFFICE_BRIDGED_EXTENSIONS | MARKITDOWN_NATIVE_EXTENSIONS
+SUPPORTED_EXTENSION_LABEL = ", ".join(sorted(SUPPORTED_EXTENSIONS))
+SUPPORTED_PICKER_EXTENSIONS = [extension.removeprefix(".") for extension in sorted(SUPPORTED_EXTENSIONS)]
 
 
 def is_supported_file(path: str | Path) -> bool:

@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-一个用于将 `.doc` 和 `.docx` 文档转换为 Markdown 的 Windows 桌面小工具。
+一个用于将 MarkItDown 支持的本地文件转换为 Markdown 的 Windows 桌面小工具。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows-blue.svg)](#windows-快速开始)
@@ -10,18 +10,21 @@
 
 ## 项目简介
 
-这个项目提供了一个简单直接的桌面工具，用来把 Word 文档转换成 Markdown。
+这个项目提供了一个简单直接的桌面工具，用来把文档和文本类文件转换成 Markdown。
 
 - `.docx` 直接通过 MarkItDown 转换
 - `.doc` 先通过 LibreOffice 转成临时 `.docx` 再继续转换
+- 其他支持的本地格式直接交给 MarkItDown 转换
 - 默认输出到源文件目录，也支持统一输出到自定义目录
 
 ## 功能特点
 
 - 基于 Flet 的现代化单窗口桌面应用
 - 支持单个或多个文件批量转换
-- `.docx` 直接通过 MarkItDown 转换
+- MarkItDown 支持的本地文件格式直接转换
 - `.doc` 先通过 LibreOffice 无界面转换为临时 `.docx`，再交给 MarkItDown
+- 支持 `.pdf`、`.docx`、`.pptx`、`.xlsx`、`.xls`、`.csv`、`.json`、`.jsonl`、`.xml`、`.html`、`.htm`、`.txt`、`.text`、`.md`、`.markdown`、`.epub`、`.ipynb`、`.msg`、`.zip` 等文档和文本类格式
+- 也允许 MarkItDown 的媒体输入格式，如 `.jpg`、`.jpeg`、`.png`、`.mp3`、`.wav`、`.m4a`、`.mp4`
 - 默认输出到源文件同目录
 - 支持自定义输出目录
 - 支持卡片式文件列表、状态标签、进度条和运行日志
@@ -93,6 +96,14 @@ pyinstaller markitdown_tool.spec
 预期输出：
 
 - `dist/MarkItDownTool.exe`
+
+## 支持的输入文件
+
+本工具参考 Microsoft MarkItDown 的本地文件转换能力。YouTube 页面等仅 URL 输入不属于当前桌面文件选择器范围。
+
+- 文档：`.pdf`、`.docx`、`.doc`、`.pptx`、`.xlsx`、`.xls`、`.epub`、`.msg`
+- 文本和结构化文本：`.txt`、`.text`、`.md`、`.markdown`、`.csv`、`.json`、`.jsonl`、`.xml`、`.html`、`.htm`、`.ipynb`
+- 压缩包和媒体：`.zip`、`.jpg`、`.jpeg`、`.png`、`.mp3`、`.wav`、`.m4a`、`.mp4`
 
 ## 关于 `.doc`
 

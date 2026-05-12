@@ -1,14 +1,21 @@
 from pathlib import Path
 import unittest
 
-from src.utils import build_output_path, get_output_folder_for_open, is_supported_file
+from src.utils import (
+    MARKITDOWN_NATIVE_EXTENSIONS,
+    build_output_path,
+    get_output_folder_for_open,
+    is_supported_file,
+)
 
 
 class UtilsTests(unittest.TestCase):
-    def test_is_supported_file_accepts_doc_and_docx(self) -> None:
+    def test_is_supported_file_accepts_markitdown_local_formats(self) -> None:
         self.assertTrue(is_supported_file("a.doc"))
         self.assertTrue(is_supported_file("b.docx"))
-        self.assertFalse(is_supported_file("c.txt"))
+        for extension in MARKITDOWN_NATIVE_EXTENSIONS:
+            self.assertTrue(is_supported_file(f"sample{extension}"))
+        self.assertFalse(is_supported_file("c.exe"))
 
     def test_build_output_path_uses_custom_directory(self) -> None:
         result = build_output_path("/tmp/invoice.docx", "/exports")

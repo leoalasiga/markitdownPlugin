@@ -11,7 +11,13 @@ from typing import Any
 
 from src.converter import convert_one
 from src.libreoffice import find_soffice
-from src.utils import get_output_folder_for_open, is_doc_file, is_supported_file
+from src.utils import (
+    SUPPORTED_EXTENSION_LABEL,
+    SUPPORTED_PICKER_EXTENSIONS,
+    get_output_folder_for_open,
+    is_doc_file,
+    is_supported_file,
+)
 
 
 @dataclass
@@ -100,7 +106,7 @@ class ConverterApp:
             self.page.overlay.extend([self.file_picker, self.folder_picker])
 
         self.status_text = self.ft.Text("Ready", size=13, color="#64748b")
-        self.summary_text = self.ft.Text("Add .doc or .docx files to begin.", size=14, color="#475569")
+        self.summary_text = self.ft.Text("Add supported files to begin.", size=14, color="#475569")
         self.file_list = self.ft.Column(spacing=10, scroll="auto", expand=True)
         self.log_list = self.ft.Column(spacing=8, scroll="auto", expand=True)
         self.progress = self.ft.ProgressBar(value=0, height=7, color="#0f9f9a", bgcolor="#e2e8f0")
@@ -151,7 +157,7 @@ class ConverterApp:
 
         self._configure_page()
         self._build_ui()
-        self._append_log("Ready. Add Word files, choose output options, then start conversion.")
+        self._append_log("Ready. Add supported files, choose output options, then start conversion.")
         self.page.run_thread(self._poll_results)
 
     def _configure_page(self) -> None:
@@ -266,7 +272,7 @@ class ConverterApp:
                     controls=[
                         self.ft.Text("Document to Markdown", size=28, weight="w700", color="#102a43"),
                         self.ft.Text(
-                            "Convert Word documents with a cleaner desktop workflow.",
+                            "Convert documents and text-based files with a cleaner desktop workflow.",
                             size=14,
                             color="#64748b",
                         ),
@@ -328,7 +334,7 @@ class ConverterApp:
                             self.ft.Column(
                                 controls=[
                                     self.ft.Text("Files", size=18, weight="w700", color="#102a43"),
-                                    self.ft.Text("Supports .doc and .docx. Duplicates are skipped.", size=13, color="#64748b"),
+                                    self.ft.Text("Supports MarkItDown local file formats. Duplicates are skipped.", size=13, color="#64748b"),
                                 ],
                                 spacing=2,
                                 expand=True,
@@ -357,7 +363,7 @@ class ConverterApp:
                         content=self.ft.Column(
                             controls=[
                                 self.ft.Icon(self._icon("DRIVE_FOLDER_UPLOAD"), color="#0f766e", size=34),
-                                self.ft.Text("Click to select Word documents", size=15, weight="w600", color="#102a43"),
+                                self.ft.Text("Click to select files", size=15, weight="w600", color="#102a43"),
                                 self.ft.Text("Batch conversion is supported.", size=12, color="#64748b"),
                             ],
                             spacing=4,
@@ -435,8 +441,8 @@ class ConverterApp:
             return
         result = self.file_picker.pick_files(
             allow_multiple=True,
-            allowed_extensions=["doc", "docx"],
-            dialog_title="Select Word files",
+            allowed_extensions=SUPPORTED_PICKER_EXTENSIONS,
+            dialog_title="Select files",
         )
         if inspect.isawaitable(result):
             self._add_selected_files(await result)
@@ -526,7 +532,7 @@ class ConverterApp:
             return
         source_paths = [item.path for item in self.files]
         if not source_paths:
-            self._show_message("No files", "Select at least one .doc or .docx file.")
+            self._show_message("No files", f"Select at least one supported file: {SUPPORTED_EXTENSION_LABEL}.")
             return
 
         output_dir: str | None
@@ -701,7 +707,7 @@ class ConverterApp:
             self.summary_text.value = f"{finished}/{total} files processed"
         elif total == 0:
             self.status_text.value = "Ready"
-            self.summary_text.value = "Add .doc or .docx files to begin."
+            self.summary_text.value = "Add supported files to begin."
         elif finished == total and total > 0 and (successes or failures):
             self.status_text.value = "Finished"
             self.summary_text.value = f"Finished. Success: {successes}, Failed: {failures}"
@@ -765,7 +771,20 @@ class ConverterApp:
             self.page.update()
 
     def _file_icon(self, path: Path) -> Any:
-        return self._icon("ARTICLE") if path.suffix.lower() == ".docx" else self._icon("DESCRIPTION")
+        extension = path.suffix.lower()
+        if extension in {".doc", ".docx", ".pdf", ".epub"}:
+            return self._icon("ARTICLE")
+        if extension in {".xls", ".xlsx", ".csv", ".json", ".jsonl", ".xml"}:
+            return self._icon("TABLE_CHART")
+        if extension in {".pptx"}:
+            return self._icon("SLIDESHOW")
+        if extension in {".jpg", ".jpeg", ".png"}:
+            return self._icon("IMAGE")
+        if extension in {".mp3", ".wav", ".m4a", ".mp4"}:
+            return self._icon("AUDIO_FILE")
+        if extension == ".zip":
+            return self._icon("FOLDER_ZIP")
+        return self._icon("DESCRIPTION")
 
     def _icon(self, name: str) -> Any:
         if self.icons is None:

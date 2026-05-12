@@ -170,6 +170,30 @@ class AppImportTests(unittest.TestCase):
 
         self.assertEqual([item.path.name for item in app.files], ["example.docx"])
 
+    def test_file_picker_allows_markitdown_local_formats(self) -> None:
+        gui = importlib.import_module("src.gui")
+
+        class FilePicker:
+            def __init__(self) -> None:
+                self.kwargs = None
+
+            async def pick_files(self, **kwargs):
+                self.kwargs = kwargs
+                return []
+
+        picker = FilePicker()
+        app = SimpleNamespace(
+            running=False,
+            file_picker=picker,
+            _add_selected_files=lambda _files: None,
+        )
+
+        asyncio.run(gui.ConverterApp.add_files(app))
+
+        self.assertIn("pdf", picker.kwargs["allowed_extensions"])
+        self.assertIn("xlsx", picker.kwargs["allowed_extensions"])
+        self.assertIn("json", picker.kwargs["allowed_extensions"])
+
     def test_button_factory_uses_content_keyword_for_current_flet(self) -> None:
         gui = importlib.import_module("src.gui")
 
